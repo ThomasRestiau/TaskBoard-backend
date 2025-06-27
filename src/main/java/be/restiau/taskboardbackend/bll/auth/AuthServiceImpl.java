@@ -1,5 +1,7 @@
 package be.restiau.taskboardbackend.bll.auth;
 
+import be.restiau.taskboardbackend.api.auth.dto.LoginRequest;
+import be.restiau.taskboardbackend.api.auth.dto.LoginResponse;
 import be.restiau.taskboardbackend.api.auth.dto.SignupRequest;
 import be.restiau.taskboardbackend.api.auth.dto.UserLiteDTO;
 import be.restiau.taskboardbackend.dal.UserRepository;
@@ -17,6 +19,8 @@ public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
+
     @Override
     public UserLiteDTO register(SignupRequest signupRequest) {
 
@@ -31,5 +35,20 @@ public class AuthServiceImpl implements AuthService {
         User savedUser = userRepository.save(toSave);
 
         return userMapper.toDTO(savedUser);
+    }
+
+    @Override
+    public LoginResponse login(LoginRequest loginRequest) {
+        User user = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new IllegalArgumentException("Email not found")); //TODO EmailNotFoundException
+
+
+        if (!passwordEncoder.matches(loginRequest.password(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Bad credentials"); //TODO WrongPasswordException
+        }
+
+        String jwt = jwtUtil.generateToken(user);
+
+        return new LoginResponse(jwt, userMapper.toDTO(user));
     }
 }

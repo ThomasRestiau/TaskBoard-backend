@@ -1,5 +1,7 @@
 package be.restiau.taskboardbackend.api.auth;
 
+import be.restiau.taskboardbackend.api.auth.dto.LoginRequest;
+import be.restiau.taskboardbackend.api.auth.dto.LoginResponse;
 import be.restiau.taskboardbackend.api.auth.dto.SignupRequest;
 import be.restiau.taskboardbackend.api.auth.dto.UserLiteDTO;
 import be.restiau.taskboardbackend.bll.auth.AuthService;
@@ -22,5 +24,11 @@ public class AuthController {
     public ResponseEntity<UserLiteDTO> signup(@Valid @RequestBody SignupRequest signupRequest) {
         UserLiteDTO dto = authService.register(signupRequest);
         return ResponseEntity.created(URI.create("/api/users")).body(dto);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        LoginResponse loginResponse = authService.login(loginRequest);
+        return ResponseEntity.ok(loginResponse);
     }
 }
