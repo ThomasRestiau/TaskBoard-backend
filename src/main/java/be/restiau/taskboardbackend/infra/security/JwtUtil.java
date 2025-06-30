@@ -1,35 +1,60 @@
 package be.restiau.taskboardbackend.infra.security;
 
 import be.restiau.taskboardbackend.domain.User;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtBuilder;
+import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.nio.charset.StandardCharsets;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.util.Date;
 
 @Component
 public class JwtUtil {
 
-    @Value("${app.jwt.secret}")
-    private String secret;
+    private final byte[] secret = "write-your-beautiful-secret-just-here".getBytes();
 
-    private static final long EXPIRATION_MS = 86_400_000; // 24 h
+    private SecretKey getSecretKey() {
+        return new SecretKeySpec(secret, "HmacSHA256");
+    }
+
+    private final int expireAt = 86400; // 1 day in seconds
+
+    private final JwtBuilder builder;
+
+    private final JwtParser parser;
+
+    public JwtUtil() {
+        this.builder = Jwts.builder().signWith(this.getSecretKey());
+        this.parser = Jwts.parserBuilder().setSigningKey(this.getSecretKey()).build();
+    }
 
     public String generateToken(User user) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + EXPIRATION_MS);
-
-        return Jwts.builder()
-                .setSubject(user.getId().toString())
-                .claim("email", user.getEmail())
-                .claim("fullName", user.getFullName())
-                .setIssuedAt(now)
-                .setExpiration(expiry)
-                .signWith(SignatureAlgorithm.HS256, secret.getBytes(StandardCharsets.UTF_8))
+        return this.builder
+                .setSubject(user.getEmail())
+                .claim("id", user.getId())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expireAt * 1000L))
                 .compact();
     }
 
-// TODO validateToken(...) à implémenter pour la future sécurité des endpoints
+    private Claims getClaims(String token) {
+        return this.parser.parseClaimsJws(token).getBody();
+    }
+
+    public String getUsername(String token) {
+        return this.getClaims(token).getSubject();
+    }
+
+    public Long getUserId(String token) {
+        return this.getClaims(token).get("id", Long.class);
+    }
+
+    public boolean isValidToken(String token) {
+        Claims claims = getClaims(token);
+        Date now = new Date();
+        return now.after(claims.getIssuedAt()) && now.before(claims.getExpiration());
+    }
 }
