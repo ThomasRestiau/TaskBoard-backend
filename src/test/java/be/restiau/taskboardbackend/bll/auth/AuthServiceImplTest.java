@@ -22,12 +22,17 @@ import static org.mockito.Mockito.*;
 @ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class AuthServiceImplTest {
 
-    @Mock private UserRepository userRepository;
-    @Mock private UserMapper userMapper;
-    @Mock private PasswordEncoder passwordEncoder;
-    @Mock private JwtUtil jwtUtil;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private UserMapper userMapper;
+    @Mock
+    private PasswordEncoder passwordEncoder;
+    @Mock
+    private JwtUtil jwtUtil;
 
-    @InjectMocks private AuthServiceImpl authService;
+    @InjectMocks
+    private AuthServiceImpl authService;
 
     private SignupRequest request;
     private User toSave;
@@ -38,7 +43,7 @@ class AuthServiceImplTest {
         request = new SignupRequest("john@mail.com", "John Doe", "pass12345");
 
         toSave = new User();                           // entité avant save
-        saved  = new User();                           // entité retournée par save
+        saved = new User();                           // entité retournée par save
         saved.setEmail("john@mail.com");
         saved.setFullName("John Doe");
         saved.setPasswordHash("bcryptHash");
