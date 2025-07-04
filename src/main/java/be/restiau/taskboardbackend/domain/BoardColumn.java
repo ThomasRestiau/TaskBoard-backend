@@ -40,6 +40,11 @@ public class BoardColumn {
     @OrderBy("position ASC")
     private final List<Task> tasks = new ArrayList<>();
 
+    public BoardColumn(String name, Integer position) {
+        this.name =  name;
+        this.position = position;
+    }
+
     public void addTask(Task task) {
         tasks.add(task);
         task.setBoardColumn(this);
