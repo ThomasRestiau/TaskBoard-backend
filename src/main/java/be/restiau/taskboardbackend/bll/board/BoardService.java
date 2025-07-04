@@ -7,4 +7,8 @@ public interface BoardService {
 
     BoardResponse create(User owner, String name);
 
+    BoardResponse rename(Long boardId, Long ownerId, String newName);
+
+    void delete(Long boardId, Long ownerId);
+
 }
