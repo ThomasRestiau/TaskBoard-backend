@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface BoardColumnRepository extends JpaRepository<BoardColumn, Long> {
     List<BoardColumn> findByBoardIdOrderByPosition(Long boardId);
+    boolean existsByBoardIdAndNameIgnoreCase(Long boardId, String name);
+    Integer countByBoardId(Long boardId);
 }
