@@ -11,6 +11,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
+import java.util.List;
 
 @CrossOrigin("*")
 @RestController
@@ -61,4 +62,15 @@ public class BoardController {
         URI location = URI.create("/api/boards/%d/columns/%d".formatted(boardId, dto.id()));
         return ResponseEntity.created(location).body(dto);
     }
+
+    @PatchMapping("/{boardId}/columns/reorder")
+    public ResponseEntity<Void> reorderColumns(
+            @AuthenticationPrincipal AppUserDetails principal,
+            @PathVariable Long boardId,
+            @RequestBody @Valid List<ReorderColumnRequest> payload
+    ) {
+        boardColumnService.reorderColumns(boardId, principal.getUser().getId(), payload);
+        return ResponseEntity.noContent().build();
+    }
+
 }
